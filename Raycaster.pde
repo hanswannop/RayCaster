@@ -2,16 +2,14 @@
 // 2013 Hans Wannop
 // Processing Raycaster by Hans Wannop is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License.
 
-import polymonkey.time.*; // polymonkey by Matt Ditton 2010 https://code.google.com/p/polymonkey/ 
-
 final static float FOV             = 70.0f;
 final static float BLOCKSIZE       = 64.0f;
 final static float PLAYERHEIGHT    = 48.0f;
 final static int   LEVELWIDTH      = 16;
 final static int   LEVELHEIGHT     = 16;
 final static float MAPSCALE        = 0.125f;
-final static float MOVESPEED       = 128f;
-final static float ROTSPEED        = 90f;
+final static float MOVESPEED       = 0.5f;
+final static float ROTSPEED        = 0.1f;
 final static int   LINEWIDTH       = 4;
 
 int[][] levelData          = {
@@ -52,7 +50,8 @@ boolean ctrlPressed = false;
 boolean altPressed = false;
 color   groundBottom, groundTop, ceilingBottom, ceilingTop;
 
-Time    time;
+int prevTime = 0;
+int deltaTime = 0;
 
 void setup() {
   size(640, 480, P2D);
@@ -60,7 +59,6 @@ void setup() {
   wallTextures[1] = loadImage("wallTexture2.jpg");
   distToPlane = (width/2)/tan(radians(FOV/2));
   angleBetweenRays = FOV/width;
-  time = new Time(this);
   
   // Define colors
   groundBottom = color(128, 64, 0);
@@ -75,6 +73,8 @@ void setup() {
 }
 
 void draw() {
+  deltaTime = millis() - prevTime;
+  
   // Background
   setGradient(0, 0, width, height/2, ceilingTop, ceilingBottom);
   setGradient(0, height/2, width, height, groundTop, groundBottom);
@@ -270,11 +270,13 @@ void draw() {
   }
 
 
-  playerX-= cos(radians(playerAngle)) * (moveY*MOVESPEED*time.getDeltaTime());
-  playerY-= sin(radians(playerAngle)) * (moveY*MOVESPEED*time.getDeltaTime());
-  playerX-= sin(radians(playerAngle)) * (moveX*MOVESPEED*time.getDeltaTime());
-  playerY+= cos(radians(playerAngle)) * (moveX*MOVESPEED*time.getDeltaTime());
-  playerAngle+=rot*ROTSPEED*time.getDeltaTime();
+  playerX-= cos(radians(playerAngle)) * (moveY*MOVESPEED*deltaTime);
+  playerY-= sin(radians(playerAngle)) * (moveY*MOVESPEED*deltaTime);
+  playerX-= sin(radians(playerAngle)) * (moveX*MOVESPEED*deltaTime);
+  playerY+= cos(radians(playerAngle)) * (moveX*MOVESPEED*deltaTime);
+  playerAngle+=rot*ROTSPEED*deltaTime;
+  
+  prevTime = millis();
 }
 
 void setGradient(int x, int y, float w, float h, color c1, color c2) {
@@ -310,4 +312,3 @@ void keyReleased()
     if (keyCode == ALT) altPressed = false;
   }
 }
-
